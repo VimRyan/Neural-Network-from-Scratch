@@ -58,6 +58,7 @@
             this.radioButton2.TabIndex = 1;
             this.radioButton2.Text = "Test Images";
             this.radioButton2.UseVisualStyleBackColor = true;
+            this.radioButton2.CheckedChanged += new System.EventHandler(this.radioButton2_CheckedChanged);
             // 
             // radioButton1
             // 
@@ -70,6 +71,7 @@
             this.radioButton1.TabStop = true;
             this.radioButton1.Text = "Train images";
             this.radioButton1.UseVisualStyleBackColor = true;
+            this.radioButton1.CheckedChanged += new System.EventHandler(this.radioButton1_CheckedChanged);
             // 
             // label1
             // 
@@ -95,6 +97,8 @@
             this.numericUpDown1.Name = "numericUpDown1";
             this.numericUpDown1.Size = new System.Drawing.Size(150, 27);
             this.numericUpDown1.TabIndex = 3;
+            this.numericUpDown1.ValueChanged += new System.EventHandler(this.numericUpDown1_ValueChanged);
+            this.numericUpDown1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.NumericEnterVal);
             // 
             // label3
             // 
@@ -130,6 +134,7 @@
             this.button1.TabIndex = 7;
             this.button1.Text = "Start Training";
             this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // button2
             // 
@@ -139,6 +144,7 @@
             this.button2.TabIndex = 8;
             this.button2.Text = "Make Prediction";
             this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // Form1
             // 

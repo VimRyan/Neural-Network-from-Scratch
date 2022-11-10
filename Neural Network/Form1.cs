@@ -4,7 +4,8 @@ namespace Neural_Network {
     public partial class Form1 : Form {
         public Form1() {
             InitializeComponent();
-            neuralNetwork network;
+            
+            network = new neuralNetwork();
 
             //this will load two 2d arrays with the image pixel data
             trainImages = OpenByteFile(trainImagePath, trainMax);
@@ -19,6 +20,7 @@ namespace Neural_Network {
             numericUpDown1.Maximum = trainMax - 1;
         }
 
+        neuralNetwork network;
         private const int trainMax = 60_000;
         private const int testMax = 10_000;
 
@@ -94,6 +96,11 @@ namespace Neural_Network {
             return data;
         }
 
+        /**
+         * Displays an image based on the passed parameters
+         * ImageType indicates if its a test image or a training image
+         * ImageVal is the position in the array
+         */
         private void displayImage(bool imageType, int imageVal) {
             Bitmap picImage = new Bitmap(28, 28);
             Color pix;
@@ -122,6 +129,10 @@ namespace Neural_Network {
             pictureBox1.Image = makeBig(makeBig(picImage));
 
         }
+        
+        /*
+         * Increases the size of the passed bitmap
+         */
         private Bitmap makeBig(Bitmap image) {
             Bitmap newBitmap = new Bitmap(image.Width * 3, image.Height * 3);
             Color pix;
@@ -139,7 +150,73 @@ namespace Neural_Network {
             return newBitmap;
 
         }
+
+        /*
+         * The functions below add functionality to the buttons
+         */
+        private void radioButton1_CheckedChanged(object sender, EventArgs e) {
+            numericUpDown1.Maximum = trainMax - 1;
+            displayImage(true, (int)numericUpDown1.Value);
+        }
+
+        private void radioButton2_CheckedChanged(object sender, EventArgs e) {
+            numericUpDown1.Maximum = testMax - 1;
+            displayImage(false, (int)numericUpDown1.Value);
+        }
+
+        private void NumericEnterVal(object sender, KeyEventArgs e) {
+            if (e.KeyCode == Keys.Enter) {
+                if (!int.TryParse(numericUpDown1.Value.ToString(), out int value)) {
+                    numericUpDown1.Value = (int)numericUpDown1.Value;
+                    throw new Exception("Error entered value is not an int.");
+                }
+
+                e.Handled = true;
+                e.SuppressKeyPress = true;
+            }
+        }
+
+        private void numericUpDown1_ValueChanged(object sender, EventArgs e) {
+           
+            if (!int.TryParse(numericUpDown1.Value.ToString(), out int value)) {
+                throw new Exception("Error: Entered value is not an int.");
+            }
+
+            displayImage(radioButton1.Checked ? true : false, (int)numericUpDown1.Value);
+
+        }
+
+        /*
+         * Starts one epoch
+         * Training takes a while to complete
+         */
+        private void button1_Click(object sender, EventArgs e) {
+            //start the training loop
+            displayMessage("This might take a while");
+            network.startEpoch();
+
+            displayMessage("Done");
+        }
+
+        /*
+         * Makes a prediction for the current image
+         */
+        private void button2_Click(object sender, EventArgs e) {
+
+        }
+
+        /*
+         * Creates a form that displays the passed string
+         */
+        private void displayMessage(string msg) {
+            Form temp = new Form() { Size = new Size(400, 100) };
+            temp.Text = msg;
+            temp.Show();
+        }
+
     }
+
+
 
     class neuralNetwork {
 
@@ -148,8 +225,9 @@ namespace Neural_Network {
             
         }
 
+        public void startEpoch() {
 
-      
+        }
     }
 
 }
