@@ -4,25 +4,24 @@ namespace Neural_Network {
     public partial class Form1 : Form {
         public Form1() {
             InitializeComponent();
-            
-            network = new neuralNetwork();
 
-            //this will load two 2d arrays with the image pixel data
-            trainImages = OpenByteFile(trainImagePath, trainMax);
-            testImages = OpenByteFile(testImagePath, testMax);
-
-            trainLabels = openLabelFile(trainLabelsPath, trainMax);
-            testLabels = openLabelFile(testLabelsPath, testMax);
+            //these will load 4 arrays with the image data
+            im.trainImages = OpenByteFile(trainImagePath, trainMax);
+            im.testImages = OpenByteFile(testImagePath, testMax);
+            im.trainLabels = openLabelFile(trainLabelsPath, trainMax);
+            im.testLabels = openLabelFile(testLabelsPath, testMax);
 
             numericUpDown1.Maximum = trainMax - 1;
-
             displayImage(radioButton1.Checked ? true : false, (int)numericUpDown1.Value);
             numericUpDown1.Maximum = trainMax - 1;
+
+            network = new neuralNetwork(im);
         }
 
-        neuralNetwork network;
         private const int trainMax = 60_000;
         private const int testMax = 10_000;
+        neuralNetwork network;
+        readonly images im = new(trainMax, testMax, 784);
 
         //Theses are the file paths to access the mnist images
         //Image files contain the images themselves
@@ -32,14 +31,9 @@ namespace Neural_Network {
         private const String testLabelsPath = "..\\..\\..\\t10k-labels.idx1-ubyte";
         private const String trainLabelsPath = "..\\..\\..\\train-labels.idx1-ubyte";
 
-        //Arrays that will store all test and training images and labels
-        private int[,] trainImages = new int[trainMax, 28 * 28];
-        private int[,] testImages = new int[testMax, 28 * 28];
-        private int[] trainLabels = new int[trainMax];
-        private int[] testLabels = new int[testMax];
+
 
         int imageTruth;
-        int epochs = 0;
         int[] currentImage = new int[784];
 
         /**
@@ -109,12 +103,12 @@ namespace Neural_Network {
 
 
             if (imageType) {
-                images = trainImages;
-                imageTruth = trainLabels[imageVal];
+                images = im.trainImages;
+                imageTruth = im.trainLabels[imageVal];
                 label4.Text = "Image Truth: " + imageTruth.ToString();
             } else {
-                images = testImages;
-                imageTruth = testLabels[imageVal];
+                images = im.testImages;
+                imageTruth = im.testLabels[imageVal];
                 label4.Text = "Image Truth: " + imageTruth.ToString();
             }
 
@@ -215,18 +209,58 @@ namespace Neural_Network {
         }
 
     }
+    
+    
+    public class images {
+        //Arrays that will store all test and training images and labels
+        public int[,] trainImages;
+        public int[,] testImages;
+        public int[] trainLabels;
+        public int[] testLabels;
 
-
-
-    class neuralNetwork {
-
-        //Default constructor
-        public neuralNetwork() {
-            
+        public images(int trainMax, int testMax, int pixelCount) {
+            trainImages = new int[trainMax, 28 * 28];
+            testImages = new int[testMax, 28 * 28];
+            trainLabels = new int[trainMax];
+            testLabels = new int[testMax];
         }
 
-        public void startEpoch() {
+    }
 
+    class neuralNetwork {
+        int epochs;
+
+        public int[,] trainImages;
+        public int[,] testImages;
+        public int[] trainLabels;
+        public int[] testLabels;
+
+        double[,] wO = new double[784, 50]; double[,] w = new double[784, 50];
+        double[] bO = new double[50]; double[] b = new double[50];
+        double[,] uO = new double[50, 10]; double[,] u = new double[50, 10];
+        double[] cO = new double[10]; double[] c = new double[10];
+        //   double[] zO = new double[10];      
+        double[] z = new double[10];
+        double[] s = new double[50]; double[] y = new double[50];
+        double[] r = new double[10];
+        int[] t = new int[10];
+
+        private const double learn = 0.005;
+
+
+        public neuralNetwork(images im) {
+            epochs = 0;
+            trainImages = im.trainImages;
+            testImages = im.testImages;
+            trainLabels = im.trainLabels;
+            testLabels = im.testLabels;
+        }
+
+        /*
+         */
+        
+        public void startEpoch() {
+            
         }
     }
 
