@@ -14,6 +14,6 @@ Pressing the "Start Training" button will begin one training cycle. The training
 
 ![My Image](Capture1.PNG)
 
-After training the Neural Network, it will be able to start making predicitions on what the current image is.
+After training the Neural Network, it will be able to start making predicitions on what the current image is. More training cycles will increase its accuracy.
 
 ![My Image](Capture2.PNG)
