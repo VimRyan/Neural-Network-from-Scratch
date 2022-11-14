@@ -1,6 +1,6 @@
 # MNIST Neural Network from Scratch
 
-This is a Neural Network from scratch written in C# using the .NET framework.
+This is a Neural Network made from scratch written in C# using the .NET framework.
 
 It classifies the MNIST Handwritten Digit dataset.
 
