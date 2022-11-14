@@ -189,10 +189,14 @@ namespace Neural_Network {
         private void button1_Click(object sender, EventArgs e) {
             //start the training loop
             displayMessage("This might take a while");
+
             network.startEpoch();
+           // network.startEpoch();
+           // network.startEpoch();
+            label2.Text = "Current Accuracy: " +  (network.calcError()).ToString("##.##") + "%";
 
 
-            label2.Text = "Epochs: " + network.epochs.ToString();
+            label1.Text = "Epochs: " + network.epochs.ToString();
             displayMessage("Done");
         }
 
@@ -200,7 +204,21 @@ namespace Neural_Network {
          * Makes a prediction for the current image
          */
         private void button2_Click(object sender, EventArgs e) {
+            double[] output;
+            double vals;
+            int index = 0;
 
+            output = network.makePrediction(currentImage);
+
+            vals = output[0];
+            for (int i = 1; i < output.Length; i++) {
+                if (vals < output[i]) {
+                    index = i;
+                    vals = output[i];
+                }
+            }
+
+            label3.Text = "Prediction: " + index.ToString();
         }
 
         /*
@@ -241,68 +259,80 @@ namespace Neural_Network {
         int[] testLabels;
 
         // Variables that dictate the amount of nodes each layer has  
-        static int layer1count = 50;
+        static int layer1count = 100;
         static int outputLayerCount = 10;
-        static int inputLayerCount;
+        static int inputLayerCount = 784;
 
         int trainMax, testMax;
 
         //arrays that are used to do the calculations
 
-        double[] inputLayer  = new double[inputLayerCount];
-        
-        // double[,] wO = new double[784, 50]; double[,] w = new double[784, 50];
-        double[,] weight1Old = new double[inputLayerCount, layer1count];
-        double[,] weight1 = new double[inputLayerCount, layer1count];
+        double[,] weight1Old;
+        double[,] weight1;
 
-        //double[] y = new double[50];
-        double[] firstLayer = new double[layer1count];
+        double[] firstLayer;
 
-        // double[] bO = new double[50]; double[] b = new double[50];
-        double[] layer1BiasOld = new double[layer1count];
-        double[] layer1Bias    = new double[layer1count];
+        double[] layer1BiasOld;
+        double[] layer1Bias;
 
-        // double[] s = new double[50]; 
-        double[] S = new double[layer1count]; 
+        double[] S;
 
-        // double[,] uO = new double[50, 10]; double[,] u = new double[50, 10];
-        double[,] weight2Old = new double[layer1count, outputLayerCount];
-        double[,] weight2    = new double[layer1count, outputLayerCount];
+        double[,] weight2Old;
+        double[,] weight2;
 
-        // double[] cO = new double[10]; double[] c = new double[10];
-        double[] outLayerBiasOld = new double[outputLayerCount];
-        double[] outLayerBias    = new double[outputLayerCount];
+        double[] outLayerBiasOld;
+        double[] outLayerBias;
 
-        //double[] r = new double[10];
-        double[] outputLayer = new double[outputLayerCount];
+        double[] outputLayer;
+        double[] finalOutput;
+        double[] truth;
 
-        // double[] z = new double[10];
-        double[] finalOutput = new double[outputLayerCount];
 
-        //int[] t = new int[10];
-        double[] truth = new double[outputLayerCount];
-
-        /* double[,] wO = new double[784, 50]; double[,] w = new double[784, 50];
-         double[] bO = new double[50]; double[] b = new double[50];
-         double[,] uO = new double[50, 10]; double[,] u = new double[50, 10];
-         double[] cO = new double[10]; double[] c = new double[10];
-         //   double[] zO = new double[10];      
-         double[] z = new double[10];
-         double[] s = new double[50]; double[] y = new double[50];
-         double[] r = new double[10];
-         int[] t = new int[10];
-        */
         const double learn = 0.005;
 
+        /*
+         * Constructor
+         * Needs an images object to get all the images 
+         * The size of the input image
+         * And the amount of train and test images
+         */
         public neuralNetwork(images im, int x, int trainM, int testM) {
             epochs = 0;
-            trainImages = im.trainImages;
-            testImages = im.testImages;
-            trainLabels = im.trainLabels;
-            testLabels = im.testLabels;
-            trainMax = trainM;
-            testMax = testM;
+            trainImages = im.trainImages;  testImages = im.testImages;
+            trainLabels = im.trainLabels;  testLabels = im.testLabels;
+            trainMax = trainM;  testMax = testM;
             inputLayerCount = x;
+
+            // wO w 
+            weight1Old = new double[inputLayerCount, layer1count];
+            weight1 = new double[inputLayerCount, layer1count];
+
+            // y
+            firstLayer = new double[layer1count];
+
+            // bO b
+            layer1BiasOld = new double[layer1count];
+            layer1Bias = new double[layer1count];
+
+            // s 
+            S = new double[layer1count];
+
+            // uO u
+            weight2Old = new double[layer1count, outputLayerCount];
+            weight2 = new double[layer1count, outputLayerCount];
+
+            // cO c
+            outLayerBiasOld = new double[outputLayerCount];
+            outLayerBias = new double[outputLayerCount];
+
+            // r
+            outputLayer = new double[outputLayerCount];
+
+            // z
+            finalOutput = new double[outputLayerCount];
+
+            // t
+            truth = new double[outputLayerCount];
             fillArrays();
         }
 
@@ -444,6 +474,96 @@ namespace Neural_Network {
             });    
 
         }
+
+
+        /*
+         * Calculate the error rate based on the current neural network
+         */ 
+        public double calcError() {
+            double val;
+            double correctPredicts = 0;
+            int index;
+
+            for (int x = 0; x < testMax; x++) {
+                double[] midLayer = new double[layer1count];
+                double[] output = new double[outputLayerCount];
+
+                for (int i = 0; i < layer1count; i++) {
+                    midLayer[i] = layer1BiasOld[i];
+                    for (int j = 0; j < inputLayerCount; j++) {
+                        midLayer[i] += weight1[j, i] * testImages[x, j];
+                    }
+                }
+
+                for(int i = 0; i < layer1count; i++) {
+                    midLayer[i] = 1 / (1 + Math.Exp(-midLayer[i]));
+                }
+
+                for (int i = 0; i < outputLayerCount; i++) {
+                    output[i] = outLayerBias[i];
+                    for (int j = 0; j < layer1count; j++) {
+                        output[i] += weight2[j, i] * midLayer[j];
+                    }
+                }
+
+                for (int i = 0; i < outputLayerCount; i++) {
+                    output[i] = 1 / (1 + Math.Exp(-output[i]));
+                }
+
+                //check if the prediction is correct
+                val = output[0];
+                index = 0;
+                for (int i = 1; i < 10; i++) {
+                    if (val < output[i]) {
+                        index = i;
+                        val = output[i];
+                    }
+                }
+
+
+                if (index == testLabels[x]) {
+                    correctPredicts++;
+                }
+
+            }
+
+            val = (correctPredicts / testMax) * 100;
+
+            return val; 
+        }
+
+        /*
+         * Makes a prediction based on the passed image
+         */
+        public double[] makePrediction(int[] currentImage) {
+            double[] output = new double[outputLayerCount];
+            double[] midLayer = new double[layer1count];
+
+            for (int i = 0; i < layer1count; i++) {
+                midLayer[i] = 0;
+                for (int j = 0; j < inputLayerCount; j++) {
+                    midLayer[i] += weight1[j, i] * currentImage[j];
+                }
+            }
+
+            for (int i = 0; i < layer1count; i++) {
+                midLayer[i] = 1 / (1 + Math.Exp(-midLayer[i]));
+            }
+
+            for (int i = 0; i < outputLayerCount; i++) {
+                output[i] = 0;
+                for (int j = 0; j < layer1count; j++) {
+                    output[i] += weight2[j, i] * midLayer[j];
+                }
+            }
+
+            for (int i = 0; i < outputLayerCount; i++) {
+                output[i] = 1 / (1 + Math.Exp(-output[i]));
+            }
+
+            return output;
+        }
+
     }
 
 }
